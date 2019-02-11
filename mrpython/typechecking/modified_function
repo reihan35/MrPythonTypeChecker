@@ -1,0 +1,20 @@
+In file typechecker.py following files were modified:
+
+-> typechecker.py
+In typechecker.py following functions were modified:
+   --> TypingContext
+       ---> the following attributes were added: modifiable_vars, encountered_argument, is_modifiable
+            ----> modifiable_vars : flag each var to 
+                  -----> 0 if it cannot be modified NOR copied
+                  -----> 1 if it cannot be modified BUT can be copied
+                  -----> 2 if it can be modified AND copied
+            ----> encountered_argument : tells if an argument was encountered when exploring subranches; useful for authorizing list concatenation (see EAdd)
+            ----> is_modifiable: bring to the top level the information that the variable can or cannot be modified, making an expression valid or not
+       ---> the method register_parameters was modified: parameters were flagged in the modifiable_vars map to 1
+
+   --> type_check_Assign
+       ---> mono var case
+       ---> multi assignation: needs to be done
+   --> type_infer_EAdd: to authorize list concatenation
+   --> type_infer_ECall
+   --> type_infer_Slicing
