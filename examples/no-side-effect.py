@@ -1,7 +1,8 @@
 def f (L):
     """ list[int] -> int """
-    #M : int
-    M = L[2]
+    #a : list[int]
+    #b : int
+    (a,b) = (L,2)
     #L.append(3)
     return 0
 

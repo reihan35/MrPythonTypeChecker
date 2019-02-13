@@ -411,6 +411,23 @@ def linearize_tuple_type(tuple_type):
 
     return elem_types
     
+def linearize_tuple_type_with_modif(tuple_type):
+    if not isinstance(tuple_type, TupleType):
+        raise NotSupportedError("Can only linearize tuple types (please report)")
+    elem_types = []
+    tab = []
+    i = 0
+    
+    for elem_type in tuple_type.elem_types:
+        ctx.is_modifiable = 2
+        if isinstance(elem_type, TupleType):
+            elem_types.extend(linearize_tuple_type(elem_type))
+        else:
+            elem_types.append(elem_type)
+        tab[i] = ctx.is_modifiable  
+        i = i + 1
+
+    return (elem_types,tab)
 
 ##AJOUT
 #Faire un visiteur sur les expressions serait plus propre
@@ -474,21 +491,11 @@ def type_check_Assign(assign, ctx, global_scope = False):
     
     print(ctx.local_env)
     
-    print("type de l'expression : " + str(type(assign.target.var_name)))
     expr_type = assign.expr.type_infer(ctx)
     
     print("assign.expr vaut " + str(type(assign.expr)))
     
-    #an argument was assigned to the variable but not using slicing (the variable will not be modifiable nor copyable)
-    #TO DO:
-    #check if it is not aliasing as it can still be copied if so
-    #check if it is not concatenation of simple lists as i can still be modified and copied if so
-    #do the same for tuples
-    if(ctx.is_modifiable == 1):
-        ctx.is_modifiable = 0
-    ctx.modifiable_vars[assign.target.var_name] = ctx.is_modifiable
-    
-    print("ceci vaut " + str(ctx.modifiable_vars[assign.target.var_name]))
+
     if expr_type is None:
         return False
     
@@ -507,7 +514,16 @@ def type_check_Assign(assign, ctx, global_scope = False):
 
         # register declared type in environment
         ctx.local_env[var.var_name] = (declared_types[var.var_name], ctx.fetch_scope_mode())
-
+        #an argument was assigned to the variable but not using slicing (the variable will not be modifiable nor copyable)
+        #TO DO:
+        #check if it is not aliasing as it can still be copied if so
+        #check if it is not concatenation of simple lists as i can still be modified and copied if so
+        #do the same for tuples
+        if(ctx.is_modifiable == 1):
+            ctx.is_modifiable = 0
+        ctx.modifiable_vars[assign.target.var_name] = ctx.is_modifiable
+        
+        print("ceci vaut " + str(ctx.modifiable_vars[assign.target.var_name]))
         return True
         
     # here we have a destructured initialization
@@ -518,7 +534,9 @@ def type_check_Assign(assign, ctx, global_scope = False):
                                                 tr("Expecting a tuple")))
         return False
 
-    expr_var_types = linearize_tuple_type(expr_type)
+    (expr_var_types, expr_modifiables) = linearize_tuple_type_with_modif(expr_type)
+        
+    
 
     if len(expr_var_types) != len(assign.target.variables()):
         ctx.add_type_error(TupleDestructArityError(assign, expr_type, len(expr_var_types), len(assign.target.variables())))
@@ -526,7 +544,6 @@ def type_check_Assign(assign, ctx, global_scope = False):
 
     for (i, var) in zip(range(0, len(assign.target.variables())), assign.target.variables()):
         
-
         if var.var_name == '_': # just skip this check
             continue
 
@@ -538,7 +555,7 @@ def type_check_Assign(assign, ctx, global_scope = False):
             ctx.local_env[var.var_name] = (declared_types[var.var_name], ctx.fetch_scope_mode())
         else:
             ctx.local_env[var.var_name] = (expr_var_types[i], ctx.fetch_scope_mode())    
-
+        ctx.modifiable_vars[var.var_name] = expr_modifiables[i]
     return True
 
 Assign.type_check = type_check_Assign
@@ -949,8 +966,8 @@ def type_infer_EAdd(expr, ctx):
         as add returns a shallow copy of two given list, a verification must be done :
         - check if one of the add attributes is a parameter and if it is a parameter, check if it is a simple list
         """
-        if prv_ctx_is_modifiable == 1 or prv_ctx_is_modifiable == 0:
-            ctx._is_modifiable = 1
+        if prv_ctx_is_modifiable and prv_ctx_is_modifiable == 0:
+            ctx._is_modifiable = 0
         elif ctx.encountered_argument and (not isinstance(left_type.elem_type, ListType)):
             ctx.is_modifiable = 2
         elif ctx.encountered_argument:
@@ -1592,6 +1609,10 @@ def type_infer_Slicing(slicing, ctx):
     
     if prv_ctx_is_modifiable == 1 or ctx.is_modifiable == 0:
         ctx._is_modifiable = 0
+    elif ctx.is_modifiable == 2:
+        ctx.is_modifiable = 2
+    elif isinstance(subject_type.elem_type, ListType):
+        ctx.is_modifiable = 1
     else:
         ctx.is_modifiable = 2
         

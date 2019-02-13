@@ -3,8 +3,10 @@ def f (L, N):
     #X : list[int]
     X = L + N
     X.append(3)
+    X[0] = 1
     #M : list[list[int]]
     M = [[1, 2, 3], L[:], L[:]]
+    M[1] = L
     #W : list[list[int]]
     W = M[:]
     W[0].append(3)
