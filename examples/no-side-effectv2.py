@@ -1,15 +1,12 @@
 def f (L, N):
     """ list[int] * list[int] -> int """
     #X : list[int]
-    X = L + N
+    X = L
     X.append(3)
-    X[0] = 1
     #M : list[list[int]]
-    M = [[1, 2, 3], L[:], L[:]]
-    M[1] = L
+    M = [[1, 2, 3], X[:], L[:]]
     #W : list[list[int]]
     W = M[:]
-    W[0].append(3)
     return 0
 
 def f2(L):

@@ -491,6 +491,8 @@ def type_check_Assign(assign, ctx, global_scope = False):
     
     print(ctx.local_env)
     
+    print(assign.expr)
+    
     expr_type = assign.expr.type_infer(ctx)
     
     print("assign.expr vaut " + str(type(assign.expr)))
@@ -519,8 +521,15 @@ def type_check_Assign(assign, ctx, global_scope = False):
         #check if it is not aliasing as it can still be copied if so
         #check if it is not concatenation of simple lists as i can still be modified and copied if so
         #do the same for tuples
-        if(ctx.is_modifiable == 1):
-            ctx.is_modifiable = 0
+        if isinstance(expr_type, ListType):
+            if isinstance(expr_type.elem_type, ListType):
+                if(ctx.is_modifiable == 1):        
+                    ctx.is_modifiable = 0
+            #if simple list, it can be aliasing-> the variable is flagged as an argument if so
+            else:
+                #aliasing ? to be checked...
+                if(ctx.is_modifiable == 1):
+                    ctx.is_modifiable = 1
         ctx.modifiable_vars[assign.target.var_name] = ctx.is_modifiable
         
         print("ceci vaut " + str(ctx.modifiable_vars[assign.target.var_name]))
@@ -534,7 +543,7 @@ def type_check_Assign(assign, ctx, global_scope = False):
                                                 tr("Expecting a tuple")))
         return False
 
-    (expr_var_types, expr_modifiables) = linearize_tuple_type_with_modif(expr_type)
+    expr_var_types = linearize_tuple_type(expr_type)
         
     
 
@@ -554,8 +563,7 @@ def type_check_Assign(assign, ctx, global_scope = False):
         
             ctx.local_env[var.var_name] = (declared_types[var.var_name], ctx.fetch_scope_mode())
         else:
-            ctx.local_env[var.var_name] = (expr_var_types[i], ctx.fetch_scope_mode())    
-        ctx.modifiable_vars[var.var_name] = expr_modifiables[i]
+            ctx.local_env[var.var_name] = (expr_var_types[i], ctx.fetch_scope_mode())
     return True
 
 Assign.type_check = type_check_Assign
@@ -1607,7 +1615,7 @@ def type_infer_Slicing(slicing, ctx):
         return None
     
     
-    if prv_ctx_is_modifiable == 1 or ctx.is_modifiable == 0:
+    if prv_ctx_is_modifiable == 0 or prv_ctx_is_modifiable == 1 or ctx.is_modifiable == 0:
         ctx._is_modifiable = 0
     elif ctx.is_modifiable == 2:
         ctx.is_modifiable = 2

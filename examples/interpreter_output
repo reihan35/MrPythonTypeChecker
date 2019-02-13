@@ -1,0 +1,42 @@
+X
+M
+W
+type du parametre : list[int]
+hello hello
+type du parametre : list[int]
+hello hello
+{}
+<typechecking.prog_ast.EVar object at 0x7fb26d37b4e0>
+var name : L val dic 1
+hello<class 'typechecking.type_ast.ListType'>
+assign.expr vaut <class 'typechecking.prog_ast.EVar'>
+var : <typechecking.prog_ast.EVar object at 0x7fb26d37b4e0>
+ceci vaut 1
+<typechecking.prog_ast.EVar object at 0x7fb26d37b940>
+var name : X val dic 1
+arg vaut <typechecking.prog_ast.EVar object at 0x7fb26d37b940>
+POTENTIALLY SIDE EFFECT CALL : 
+arg vaut <typechecking.prog_ast.ENum object at 0x7fb26d37b7b8>
+POTENTIALLY SIDE EFFECT CALL : 
+{'X': (ListType(IntType()), 'function')}
+<typechecking.prog_ast.EList object at 0x7fb26d37b6d8>
+var name : X val dic 1
+var name : L val dic 1
+hello<class 'typechecking.type_ast.ListType'>
+assign.expr vaut <class 'typechecking.prog_ast.EList'>
+var : <typechecking.prog_ast.EList object at 0x7fb26d37b6d8>
+ceci vaut 2
+{'M': (ListType(ListType(IntType())), 'function'), 'X': (ListType(IntType()), 'function')}
+<typechecking.prog_ast.Slicing object at 0x7fb26d37b860>
+var name : M val dic 2
+assign.expr vaut <class 'typechecking.prog_ast.Slicing'>
+var : <typechecking.prog_ast.Slicing object at 0x7fb26d37b860>
+ceci vaut 2
+type du parametre : list[int]
+hello hello
+arg vaut <typechecking.prog_ast.EList object at 0x7fb26d37b208>
+arg vaut <typechecking.prog_ast.EList object at 0x7fb26d37bf28>
+arg vaut <typechecking.prog_ast.EList object at 0x7fb26d37b8d0>
+arg vaut <typechecking.prog_ast.EList object at 0x7fb26d37bdd8>
+arg vaut <typechecking.prog_ast.EList object at 0x7fb26d2da6d8>
+arg vaut <typechecking.prog_ast.EList object at 0x7fb26d2da1d0>
